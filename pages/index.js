@@ -1,65 +1,87 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import ReactPaginate from 'react-paginate';
+import Router, { withRouter } from 'next/router'
 
-export default function Home() {
+import MoviesList from '../components/MoviesList'
+
+const Home = (props) => {
+  const [isLoading, setLoading] = useState(false);
+  const startLoading = () => setLoading(true);
+  const stopLoading = () => setLoading(false);
+
+  useEffect(() => {
+    Router.events.on('routeChangeStart', startLoading);
+    Router.events.on('routeChangeComplete', stopLoading);
+
+    return () => {
+      Router.events.off('routeChangeStart', startLoading);
+      Router.events.off('routeChangeComplete', stopLoading);
+    }
+  }, [])
+
+  const paginationHandler = (page) => {
+    const currentPath = props.router.pathname;
+    const currentQuery = { ...props.router.query };
+    currentQuery.page = page.selected + 1;
+
+    props.router.push({
+      pathname: currentPath,
+      query: currentQuery,
+    });
+  };
+
+  if (isLoading) {
+    <div>Loading...</div>
+  }
+
+  // To limit items per page
+  // const perPage = 6;
+  // const offset = props.currentPage * perPage;
+  // const pageCount = Math.floor(props.posts.length / perPage);
+
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <div className="app-container">
+      <div className="posts">
+        <h2 className="section-title">Now Playing</h2>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        <ReactPaginate
+          previousLabel={'←'}
+          nextLabel={'→'}
+          breakLabel={'...'}
+          breakClassName={'break-me'}
+          containerClassName={'pagination'}
+          previousLinkClassName={"pagination__link"}
+          nextLinkClassName={"pagination__link"}
+          disabledClassName={"pagination__link--disabled"}
+          activeClassName={"pagination__link--active"}
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+          initialPage={props.currentPage - 1}
+          pageCount={props.pageCount}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={5}
+          onPageChange={paginationHandler}
+        />
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
+        <MoviesList movies={props.posts} />
+      </div>
     </div>
-  )
+  );
+};
+
+Home.getInitialProps = async ({ query }) => {
+  const page = query.page || 1;
+
+  const posts = await axios.get(`https://api.themoviedb.org/3/movie/now_playing?api_key=cf51a46c6ac26bd4f4c55018fdad298d&page=${page}`);
+
+  return {
+    totalCount: posts.data.total_results,
+    pageCount: posts.data.total_pages,
+    currentPage: posts.data.page,
+    posts: posts.data.results,
+    isLoading: false,
+  };
 }
+
+
+export default withRouter(Home);
