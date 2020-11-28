@@ -16,10 +16,16 @@
     padding: 0 1rem;
   }
 
-  li {
-    list-style: none;
+  .movie_list__item {
     width: 185px;
     margin: 0 1rem 1rem;
+    cursor: pointer;
+    transform: scale(0.85);
+    transition: all 0.3s ease-in;
+
+    &:hover {
+      transform: scale(1);
+    }
 
     @media screen and (max-width: 520px) {
       width: 100%;

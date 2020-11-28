@@ -23,6 +23,11 @@ const GlobalStyle = createGlobalStyle`
     position: relative;
     height: 100%;
   }
+
+  .app-container {
+    max-width: 990px;
+    margin: 5% auto 0;
+  }
 `;
 
 export default function MyApp({ Component, pageProps }) {

@@ -1,20 +1,24 @@
 import React from 'react'
-import Details from './Details'
+import Poster from './Poster'
+import { setYear } from '../utils/helpers'
 
 export default function MoviesList({ movies }) {
 
   const currentPageData = movies
     // .sort((a, b) => b.popularity - a.popularity)
     .map(movie => (
-      <Details
-        key={movie.id}
-        data={movie}
-      />
+      <div className="movie_list__item" key={movie.id}>
+        <Poster
+          data={movie}
+        />
+
+        <h2>{movie.title} ({setYear(movie.release_date)})</h2>
+      </div>
     ))
 
   return (
-    <ul className="movies-list">
+    <div className="movies-list">
       {currentPageData}
-    </ul>
+    </div>
   )
 }
