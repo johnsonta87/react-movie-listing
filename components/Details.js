@@ -1,6 +1,8 @@
 import React from 'react'
-import { setYear } from '../utils/helpers'
+import Link from 'next/link'
+import { setYear, convertToSlug } from '../utils/helpers'
 import styled from 'styled-components'
+import Ratings from './Ratings';
 
 const DetailsStyles = styled.li`
     transform: scale(0.85);
@@ -8,10 +10,6 @@ const DetailsStyles = styled.li`
 
     &:hover {
       transform: scale(1);
-
-      p {
-        height: 350px;
-      }
     }
 
     h2 {
@@ -22,23 +20,6 @@ const DetailsStyles = styled.li`
     p {
       font-size: 0.85rem;
       position: relative;
-      height: 0;
-      overflow: hidden;
-      display: block;
-      transition: height 0.4s ease-in;
-    }
-
-    .ratings {
-      img {
-        max-width: 20px;
-      }
-
-      span {
-        font-weight: bold;
-        font-size: 0.8rem;
-        position: relative;
-        top: -5px;
-      }
     }
 `
 
@@ -48,26 +29,28 @@ export default function Details({ data }) {
     poster_path,
     title,
     release_date,
-    popularity,
     adult,
-    overview
+    vote_average,
   } = data;
 
-  return (
-    <DetailsStyles>
-      {poster_path
-        ? <img src={`http://image.tmdb.org/t/p/w185/${poster_path}`} alt={title} />
-        : <img src="https://via.placeholder.com/185x278/000000/FFFFFF/?text=Poster+Unavailable" alt={title} />
-      }
+  const ratings = vote_average * 10;
+  const slug = convertToSlug(title);
 
-      <h2>{title} ({setYear(release_date)})</h2>
-      {popularity ?
-        <div className="ratings">
-          <img src="images/popularity-icon.png" alt="Popularity" /> <span>{popularity}</span>
-        </div>
-        : <span>No ratings available</span>}
-      {adult && <p>Adult rated</p>}
-      {overview ? <p>{overview}</p> : <span>No description available</span>}
-    </DetailsStyles>
+  return (
+    <Link href={`/movie/${id}`}>
+      <DetailsStyles>
+        {poster_path
+          ? <img src={`http://image.tmdb.org/t/p/w185/${poster_path}`} alt={title} />
+          : <img src="https://via.placeholder.com/185x278/000000/FFFFFF/?text=Poster+Unavailable" alt={title} />
+        }
+
+        <h2>{title} ({setYear(release_date)})</h2>
+        {ratings ?
+          <Ratings ratings={ratings} /> :
+          <span>No ratings available</span>
+        }
+        {adult && <p>Adult rated</p>}
+      </DetailsStyles>
+    </Link>
   )
 }

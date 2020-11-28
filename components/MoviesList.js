@@ -4,8 +4,7 @@ import Details from './Details'
 export default function MoviesList({ movies }) {
 
   const currentPageData = movies
-    // .slice(offset, offset + perPage)
-    .sort((a, b) => b.popularity - a.popularity)
+    // .sort((a, b) => b.popularity - a.popularity)
     .map(movie => (
       <Details
         key={movie.id}
